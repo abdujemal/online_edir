@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:online_edir/View/Widgets/sl_btn.dart';
+import 'package:online_edir/View/Widgets/sl_input.dart';
+
+import '../../Controller/user_service.dart';
+import '../../constants.dart';
+import '../Pages/LoginSignUp/controller/l_s_controller.dart';
+import 'msg_snack.dart';
+
+class Login extends StatelessWidget {
+  // const Login({ Key? key }) : super(key: key);
+
+  TextEditingController emailTC = TextEditingController();
+  TextEditingController passwordTC = TextEditingController();
+  GlobalKey<FormState> _key = GlobalKey();
+
+  LSController lsController = Get.put(LSController());
+
+  UserService userService = Get.put(UserService());
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Form(
+          key: _key,
+          child: Column(
+            children: [
+              SLInput(
+                controller: emailTC,
+                keyboardType: TextInputType.emailAddress,
+                title: 'Email'.tr,
+                hint: 'abc@website.com'.tr,
+              ),
+              const SizedBox(
+                height: 40,
+              ),
+              SLInput(
+                  isObscure: true,
+                  title: "Password".tr,
+                  hint: "*******",
+                  keyboardType: TextInputType.visiblePassword,
+                  controller: passwordTC),
+              const SizedBox(
+                height: 15,
+              ),
+            ],
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            if (emailTC.text.isNotEmpty) {
+              userService.forgetPassword(emailTC.text, context);
+            } else {
+              MSGSnack msgSnack = MSGSnack(
+                  title: "Alert!".tr,
+                  msg: "Please write your email.".tr,
+                  color: Colors.red);
+              msgSnack.show();
+            }
+          },
+          child: GestureDetector(
+            onTap: () {},
+            child: Text(
+              "Forget password?".tr,
+              style: TextStyle(color: textColor),
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 45,
+        ),
+        Obx(()=>
+          lsController.isLoading.value ?
+          const CircularProgressIndicator():
+           SLBtn(
+            text: "Log In".tr,
+            onTap: () {
+              if (_key.currentState!.validate()) {
+                userService.loginWEmailNPW(
+                    emailTC.text, passwordTC.text, context);
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
